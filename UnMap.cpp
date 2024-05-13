@@ -37,7 +37,7 @@ public:
         std::mt19937 gen(rd());
         std::uniform_int_distribution<int> dis(0, 1000);
         for (size_t i = 0; i < elements; ++i) {
-            insert(dis(gen), "random_value");
+            insert(dis(gen), dis(gen));
         }
     }
 
@@ -85,7 +85,7 @@ public:
     }
 
     void insert_or_assign(const K& key, const T& value) {
-        size_t index = hashFunction(key);
+        size_t index = hashFunction(key) & (table.size() - 1);
         while (table[index].occupied && table[index].key != key) {
             index = (index + 1) % table.size();
         }
@@ -98,7 +98,7 @@ public:
     }
 
     bool contains(const K& key) const {
-        size_t index = hashFunction(key);
+        size_t index = hashFunction(key) & (table.size() - 1);
         while (table[index].occupied) {
             if (table[index].key == key) {
                 return true;
@@ -110,30 +110,36 @@ public:
 
     T* search(const K& key) {
         size_t index = hashFunction(key) & (table.size() - 1);
-        while (table[index].occupied) {
+        int pass = 0;
+        while (pass < table.size())
+        {
             if (table[index].key == key) {
                 return &table[index].value;
             }
+            pass+=1;
             index = (index + 1) % table.size();
         }
-        return nullptr;
+        return nullptr; // Элемент не найден
     }
 
     bool erase(const K& key) {
-        size_t index = hashFunction(key);
-        while (table[index].occupied) {
+        size_t index = hashFunction(key) & (table.size() - 1);
+        int pass = 0;
+        while (pass < table.size())
+        {
             if (table[index].key == key) {
                 table[index].occupied = false;
                 --size;
-                return true;
+                return true; // Элемент удален
             }
+            pass += 1;
             index = (index + 1) % table.size();
         }
-        return false;
+        return false; // Элемент не найден
     }
 
     int count(const K& key) const {
-        size_t index = hashFunction(key);
+        size_t index = hashFunction(key) & (table.size() - 1);
         int count = 0;
         size_t originalIndex = index;
 

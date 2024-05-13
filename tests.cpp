@@ -4,7 +4,7 @@
 int main() {
     // Создание объекта хэш-таблицы
     UnorderedMap<int, std::string> map(3);
-    UnorderedMap<int, std::string> map1(30,20);
+    UnorderedMap<int, int> map1(30,20);
     std::cout << "Contents of map:" << std::endl;
     map1.print();
     std::cout << std::endl;
