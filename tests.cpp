@@ -4,8 +4,9 @@
 int main() {
     // Создание объекта хэш-таблицы
     UnorderedMap<int, std::string> map(3);
+    UnorderedMap<int, std::string> map1(30,20);
     std::cout << "Contents of map:" << std::endl;
-    map.print();
+    map1.print();
     std::cout << std::endl;
 
     // Вставка элементов
@@ -14,6 +15,7 @@ int main() {
     map.insert(3, "Three");
     map.insert(4, "Four");
     map.insert(4, "Chetire");
+    map.insert(4, "Chetire1");
     map.insert(5, "Five");
     map.insert_or_assign(5, "Six");
     //// Вывод содержимого
@@ -53,6 +55,7 @@ int main() {
     std::cout << "\nContents of map after erasing:" << std::endl;
     map.print();
 
+    // Проверка количества элементов с одинаковым ключом
     std::cout << "Count of key 4: " << map.count(4) << std::endl;
 
     return 0;

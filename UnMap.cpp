@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <vector>
+#include <random>
 #include <cstdlib>
 
 template<typename K, typename T>
@@ -16,9 +17,9 @@ private:
     size_t size;
 
     size_t hashFunction(const K& key) const {
-        const size_t multiplier = 2654435761; // Простое число близкое к 2^32/φ, где φ - золотое сечение
-        size_t hashValue = std::hash<K>{}(key);
-        return (multiplier * hashValue) % table.size(); // Используем операцию деления
+        const size_t multiplier = 2654435769; // Простое число близкое к 2^32/φ, где φ - золотое сечение
+        //size_t hashValue = std::hash<K>{}(key);
+        return (multiplier * key) % table.size(); // Используем операцию деления
     }
 
     size_t findNextFreeSlot(size_t index) const {
@@ -32,10 +33,14 @@ public:
     UnorderedMap(size_t initialSize) : table(initialSize), size(0) {}
 
     UnorderedMap(size_t initialSize, size_t elements) : UnorderedMap(initialSize) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dis(0, 1000);
         for (size_t i = 0; i < elements; ++i) {
-            insert(rand(), rand());
+            insert(dis(gen), "random_value");
         }
     }
+
 
     UnorderedMap(const UnorderedMap& other) : table(other.table), size(other.size) {}
 
@@ -68,7 +73,7 @@ public:
             table.resize(table.size() * 2);
         }
 
-        size_t index = hashFunction(key) & (table.size() - 1); // Применяем маску
+        size_t index = hashFunction(key) & (table.size() - 1);
         if (table[index].occupied) {
             index = findNextFreeSlot(index);
         }
@@ -104,7 +109,7 @@ public:
     }
 
     T* search(const K& key) {
-        size_t index = hashFunction(key) & (table.size() - 1); // Применяем маску
+        size_t index = hashFunction(key) & (table.size() - 1);
         while (table[index].occupied) {
             if (table[index].key == key) {
                 return &table[index].value;
@@ -130,12 +135,15 @@ public:
     int count(const K& key) const {
         size_t index = hashFunction(key);
         int count = 0;
-        while (table[index].occupied) {
+        size_t originalIndex = index;
+
+        do {
             if (table[index].key == key) {
                 ++count;
             }
             index = (index + 1) % table.size();
-        }
+        } while (index != originalIndex);
+
         return count;
     }
 };
