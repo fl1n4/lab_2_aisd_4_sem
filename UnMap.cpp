@@ -18,7 +18,6 @@ private:
 
     size_t hashFunction(const K& key) const {
         const size_t multiplier = 2654435769; // Простое число близкое к 2^32/φ, где φ - золотое сечение
-        //size_t hashValue = std::hash<K>{}(key);
         return (multiplier * key) % table.size(); // Используем операцию деления
     }
 
@@ -27,6 +26,17 @@ private:
             index = (index + 1) % table.size();
         }
         return index;
+    }
+    void resize(size_t new_size) {
+        std::vector<KeyValuePair> old_table = table;
+        table = std::vector<KeyValuePair>(new_size);
+        size = 0;
+
+        for (const auto& pair : old_table) {
+            if (pair.occupied) {
+                insert(pair.key, pair.value);
+            }
+        }
     }
 
 public:
@@ -72,11 +82,17 @@ public:
         if (size == table.size()) {
             table.resize(table.size() * 2);
         }
-
-        size_t index = hashFunction(key) & (table.size() - 1);
-        if (table[index].occupied) {
-            index = findNextFreeSlot(index);
+        size_t index = hashFunction(key);
+        while (table[index].occupied) {
+            if (table[index].key == key) {
+                return;
+            }
+            index = (index + 1)%table.size();
         }
+
+        //if (table[index].occupied) {
+        //    index = findNextFreeSlot(index);
+        //}
 
         table[index].key = key;
         table[index].value = value;
@@ -85,7 +101,7 @@ public:
     }
 
     void insert_or_assign(const K& key, const T& value) {
-        size_t index = hashFunction(key) & (table.size() - 1);
+        size_t index = hashFunction(key);
         while (table[index].occupied && table[index].key != key) {
             index = (index + 1) % table.size();
         }
@@ -98,7 +114,7 @@ public:
     }
 
     bool contains(const K& key) const {
-        size_t index = hashFunction(key) & (table.size() - 1);
+        size_t index = hashFunction(key);
         while (table[index].occupied) {
             if (table[index].key == key) {
                 return true;
@@ -109,7 +125,7 @@ public:
     }
 
     T* search(const K& key) {
-        size_t index = hashFunction(key) & (table.size() - 1);
+        size_t index = hashFunction(key);
         int pass = 0;
         while (pass < table.size())
         {
@@ -119,27 +135,27 @@ public:
             pass+=1;
             index = (index + 1) % table.size();
         }
-        return nullptr; // Элемент не найден
+        return nullptr;
     }
 
     bool erase(const K& key) {
-        size_t index = hashFunction(key) & (table.size() - 1);
+        size_t index = hashFunction(key);
         int pass = 0;
         while (pass < table.size())
         {
             if (table[index].key == key) {
                 table[index].occupied = false;
                 --size;
-                return true; // Элемент удален
+                return true;
             }
             pass += 1;
             index = (index + 1) % table.size();
         }
-        return false; // Элемент не найден
+        return false;
     }
 
     int count(const K& key) const {
-        size_t index = hashFunction(key) & (table.size() - 1);
+        size_t index = hashFunction(key);
         int count = 0;
         size_t originalIndex = index;
 
